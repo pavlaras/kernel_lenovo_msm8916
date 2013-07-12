@@ -147,6 +147,8 @@ static inline bool strstarts(const char *str, const char *prefix)
 size_t memweight(const void *ptr, size_t bytes);
 void memzero_explicit(void *s, size_t count);
 
+extern size_t memweight(const void *ptr, size_t bytes);
+
 /**
  * kbasename - return the last part of a pathname.
  *
