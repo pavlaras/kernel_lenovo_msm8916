@@ -30,6 +30,8 @@
 #include "mdss_debug.h"
 #include "mdss_livedisplay.h"
 
+#include "mdss_livedisplay.h"
+
 #define XO_CLK_RATE	19200000
 
 static int mdss_dsi_pinctrl_set_state(struct mdss_dsi_ctrl_pdata *ctrl_pdata,
