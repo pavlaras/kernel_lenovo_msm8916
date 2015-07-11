@@ -24,6 +24,7 @@
 
 #include "mdss_dsi.h"
 #include <linux/hardware_info.h> //req  wuzhenzhen.wt 20140924 add for hardware info
+#include "mdss_livedisplay.h"
 
 #define DT_CMD_HDR 6
 

@@ -37,6 +37,8 @@
 #define RAW_DATA_OFFSET (64*1024)
 #define CE_GAMMA_MAGIC  0x43454741 //"C" "E" "G" "A"
 
+#include "mdss_livedisplay.h"
+
 #define XO_CLK_RATE	19200000
 
 #define DSI_DISABLE_PC_LATENCY 100

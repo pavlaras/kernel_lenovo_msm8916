@@ -52,11 +52,10 @@
  */
 
 extern void mdss_dsi_panel_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,
-				     struct dsi_panel_cmds *pcmds);
+		struct dsi_panel_cmds *pcmds);
 
 static int parse_dsi_cmds(struct mdss_livedisplay_ctx *mlc,
-			  struct dsi_panel_cmds *pcmds, const uint8_t * cmd,
-			  int blen)
+		struct dsi_panel_cmds *pcmds, const uint8_t *cmd, int blen)
 {
 	int len;
 	char *buf, *bp;
@@ -78,7 +77,7 @@ static int parse_dsi_cmds(struct mdss_livedisplay_ctx *mlc,
 		dchdr->dlen = ntohs(dchdr->dlen);
 		if (dchdr->dlen > len) {
 			pr_err("%s: dtsi cmd=%x error, len=%d\n",
-			       __func__, dchdr->dtype, dchdr->dlen);
+				__func__, dchdr->dtype, dchdr->dlen);
 			goto exit_free;
 		}
 		bp += sizeof(*dchdr);
@@ -90,11 +89,12 @@ static int parse_dsi_cmds(struct mdss_livedisplay_ctx *mlc,
 
 	if (len != 0) {
 		pr_err("%s: dcs_cmd=%x len=%d error!\n",
-		       __func__, buf[0], blen);
+				__func__, buf[0], blen);
 		goto exit_free;
 	}
 
-	pcmds->cmds = kzalloc(cnt * sizeof(struct dsi_cmd_desc), GFP_KERNEL);
+	pcmds->cmds = kzalloc(cnt * sizeof(struct dsi_cmd_desc),
+			GFP_KERNEL);
 	if (!pcmds->cmds)
 		goto exit_free;
 
@@ -117,7 +117,7 @@ static int parse_dsi_cmds(struct mdss_livedisplay_ctx *mlc,
 	pcmds->link_state = mlc->link_state;
 
 	pr_debug("%s: dcs_cmd=%x len=%d, cmd_cnt=%d link_state=%d\n", __func__,
-		 pcmds->buf[0], pcmds->blen, pcmds->cmd_cnt, pcmds->link_state);
+		pcmds->buf[0], pcmds->blen, pcmds->cmd_cnt, pcmds->link_state);
 
 	return 0;
 
@@ -192,8 +192,7 @@ static void mdss_livedisplay_worker(struct work_struct *work)
 	if (pinfo == NULL)
 		return;
 
-	if (!mlc->caps
-	    || !mdss_panel_is_power_on_interactive(pinfo->panel_power_state))
+	if (!mlc->caps || !mdss_panel_is_power_on_interactive(pinfo->panel_power_state))
 		return;
 
 	mutex_lock(&mlc->lock);
@@ -202,25 +201,20 @@ static void mdss_livedisplay_worker(struct work_struct *work)
 	if ((mlc->caps & MODE_PRESET) && (mlc->updated & MODE_PRESET))
 		len += mlc->presets_len[mlc->preset];
 
-	if ((mlc->caps & MODE_COLOR_ENHANCE) &&
-	    (mlc->updated & MODE_COLOR_ENHANCE))
-		len += mlc->ce_enabled ? mlc->ce_on_cmds_len :
-		    mlc->ce_off_cmds_len;
+	if ((mlc->caps & MODE_COLOR_ENHANCE) && (mlc->updated & MODE_COLOR_ENHANCE))
+		len += mlc->ce_enabled ? mlc->ce_on_cmds_len : mlc->ce_off_cmds_len;
 
-	if ((mlc->caps & MODE_HIGH_BRIGHTNESS) &&
-	    (mlc->updated & MODE_HIGH_BRIGHTNESS))
-		len += mlc->hbm_enabled ? mlc->hbm_on_cmds_len :
-		    mlc->hbm_off_cmds_len;
+	if ((mlc->caps & MODE_HIGH_BRIGHTNESS) && (mlc->updated & MODE_HIGH_BRIGHTNESS))
+		len += mlc->hbm_enabled ? mlc->hbm_on_cmds_len : mlc->hbm_off_cmds_len;
 
 	if ((mlc->caps & MODE_SRGB) && (mlc->updated & MODE_SRGB))
-		len += mlc->srgb_enabled ? mlc->srgb_on_cmds_len :
-		    mlc->srgb_off_cmds_len;
+		len += mlc->srgb_enabled ? mlc->srgb_on_cmds_len : mlc->srgb_off_cmds_len;
 
 	if (is_cabc_cmd(mlc->updated) && is_cabc_cmd(mlc->caps)) {
-		// The CABC command on most modern panels is also responsible
-		// for other features such as SRE, ACO and CE. The register
-		// fields are bits and are OR'd together and sent in a single
-		// DSI command.
+
+		// The CABC command on most modern panels is also responsible for
+		// other features such as SRE, ACO and CE.  The register fields are bits
+		// and are OR'd together and sent in a single DSI command.
 		if (mlc->cabc_level == CABC_UI)
 			cabc_value |= mlc->cabc_ui_value;
 		else if (mlc->cabc_level == CABC_IMAGE)
@@ -243,9 +237,9 @@ static void mdss_livedisplay_worker(struct work_struct *work)
 
 		len += mlc->cabc_cmds_len;
 
-		pr_info("%s cabc=%d sre=%d aco=%d ce=%d cmd=%d\n", __func__,
-			mlc->cabc_level, mlc->sre_level,
-			mlc->aco_enabled, mlc->ce_enabled, cabc_value);
+		pr_debug("%s cabc=%d sre=%d aco=%d ce=%d cmd=%d\n", __func__,
+				mlc->cabc_level, mlc->sre_level, mlc->aco_enabled,
+				mlc->ce_enabled, cabc_value);
 	}
 
 	len += mlc->post_cmds_len;
@@ -257,48 +251,43 @@ static void mdss_livedisplay_worker(struct work_struct *work)
 
 	// Build the command as a single chain, preset first
 	if ((mlc->caps & MODE_PRESET) && (mlc->updated & MODE_PRESET)) {
-		memcpy(mlc->cmd_buf, mlc->presets[mlc->preset],
-		       mlc->presets_len[mlc->preset]);
+		memcpy(mlc->cmd_buf, mlc->presets[mlc->preset], mlc->presets_len[mlc->preset]);
 		dlen += mlc->presets_len[mlc->preset];
 	}
+
 	// Color enhancement
-	if ((mlc->caps & MODE_COLOR_ENHANCE)
-	    && (mlc->updated & MODE_COLOR_ENHANCE)) {
+	if ((mlc->caps & MODE_COLOR_ENHANCE) && (mlc->updated & MODE_COLOR_ENHANCE)) {
 		if (mlc->ce_enabled) {
-			memcpy(mlc->cmd_buf + dlen, mlc->ce_on_cmds,
-			       mlc->ce_on_cmds_len);
+			memcpy(mlc->cmd_buf + dlen, mlc->ce_on_cmds, mlc->ce_on_cmds_len);
 			dlen += mlc->ce_on_cmds_len;
 		} else {
-			memcpy(mlc->cmd_buf + dlen, mlc->ce_off_cmds,
-			       mlc->ce_off_cmds_len);
+			memcpy(mlc->cmd_buf + dlen, mlc->ce_off_cmds, mlc->ce_off_cmds_len);
 			dlen += mlc->ce_off_cmds_len;
 		}
 	}
+
 	// High brightness mode
-	if ((mlc->caps & MODE_HIGH_BRIGHTNESS) &&
-	    (mlc->updated & MODE_HIGH_BRIGHTNESS)) {
+	if ((mlc->caps & MODE_HIGH_BRIGHTNESS) && (mlc->updated & MODE_HIGH_BRIGHTNESS)) {
 		if (mlc->hbm_enabled) {
-			memcpy(mlc->cmd_buf + dlen, mlc->hbm_on_cmds,
-			       mlc->hbm_on_cmds_len);
+			memcpy(mlc->cmd_buf + dlen, mlc->hbm_on_cmds, mlc->hbm_on_cmds_len);
 			dlen += mlc->hbm_on_cmds_len;
 		} else {
-			memcpy(mlc->cmd_buf + dlen, mlc->hbm_off_cmds,
-			       mlc->hbm_off_cmds_len);
+			memcpy(mlc->cmd_buf + dlen, mlc->hbm_off_cmds, mlc->hbm_off_cmds_len);
 			dlen += mlc->hbm_off_cmds_len;
 		}
 	}
+
 	// SRGB mode
 	if ((mlc->caps & MODE_SRGB) && (mlc->updated & MODE_SRGB)) {
 		if (mlc->srgb_enabled) {
-			memcpy(mlc->cmd_buf + dlen, mlc->srgb_on_cmds,
-			       mlc->srgb_on_cmds_len);
+			memcpy(mlc->cmd_buf + dlen, mlc->srgb_on_cmds, mlc->srgb_on_cmds_len);
 			dlen += mlc->srgb_on_cmds_len;
 		} else {
-			memcpy(mlc->cmd_buf + dlen, mlc->srgb_off_cmds,
-			       mlc->srgb_off_cmds_len);
+			memcpy(mlc->cmd_buf + dlen, mlc->srgb_off_cmds, mlc->srgb_off_cmds_len);
 			dlen += mlc->srgb_off_cmds_len;
 		}
 	}
+
 	// CABC/SRE/ACO/CABC_CE features
 	if (is_cabc_cmd(mlc->updated) && mlc->cabc_cmds_len) {
 		memcpy(mlc->cmd_buf + dlen, mlc->cabc_cmds, mlc->cabc_cmds_len);
@@ -306,11 +295,13 @@ static void mdss_livedisplay_worker(struct work_struct *work)
 		// The CABC command parameter is the last value in the sequence
 		mlc->cmd_buf[dlen - 1] = cabc_value;
 	}
+
 	// And the post_cmd, can be used to turn on the panel
 	if (mlc->post_cmds_len) {
 		memcpy(mlc->cmd_buf + dlen, mlc->post_cmds, mlc->post_cmds_len);
 		dlen += mlc->post_cmds_len;
 	}
+
 	// Parse the command and send it
 	ret = parse_dsi_cmds(mlc, &dsi_cmds, mlc->cmd_buf, len);
 	if (ret == 0) {
@@ -731,34 +722,28 @@ int mdss_livedisplay_parse_dt(struct device_node *np,
 	}
 
 	mlc->srgb_on_cmds = of_get_property(np,
-			"cm,mdss-livedisplay-srgb-on-cmd",
-			&mlc->srgb_on_cmds_len);
+			"cm,mdss-livedisplay-srgb-on-cmd", &mlc->srgb_on_cmds_len);
 	if (mlc->srgb_on_cmds_len) {
 		mlc->srgb_off_cmds = of_get_property(np,
-				"cm,mdss-livedisplay-srgb-off-cmd",
-				&mlc->srgb_off_cmds_len);
+				"cm,mdss-livedisplay-srgb-off-cmd", &mlc->srgb_off_cmds_len);
 		if (mlc->srgb_off_cmds_len)
 			mlc->caps |= MODE_SRGB;
 	}
 
 	mlc->ce_on_cmds = of_get_property(np,
-			"cm,mdss-livedisplay-color-enhance-on",
-			&mlc->ce_on_cmds_len);
+			"cm,mdss-livedisplay-color-enhance-on", &mlc->ce_on_cmds_len);
 	if (mlc->ce_on_cmds_len) {
 		mlc->ce_off_cmds = of_get_property(np,
-				"cm,mdss-livedisplay-color-enhance-off",
-				&mlc->ce_off_cmds_len);
+				"cm,mdss-livedisplay-color-enhance-off", &mlc->ce_off_cmds_len);
 		if (mlc->ce_off_cmds_len)
 			mlc->caps |= MODE_COLOR_ENHANCE;
 	}
 
 	for (i = 0; i < MAX_PRESETS; i++) {
 		memset(preset_name, 0, sizeof(preset_name));
-		snprintf(preset_name, 64, "%s-%d", "cm,mdss-livedisplay-preset",
-			 i);
-		mlc->presets[mlc->num_presets] =
-		    of_get_property(np, preset_name,
-				    &mlc->presets_len[mlc->num_presets]);
+		snprintf(preset_name, 64, "%s-%d", "cm,mdss-livedisplay-preset", i);
+		mlc->presets[mlc->num_presets] = of_get_property(np, preset_name,
+				&mlc->presets_len[mlc->num_presets]);
 		if (mlc->presets_len[mlc->num_presets] > 0)
 			mlc->num_presets++;
 	}

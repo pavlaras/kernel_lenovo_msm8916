@@ -55,6 +55,7 @@
 #include "mdss_mdp.h"
 #include "mdss_fb.h"
 #include "mdss_mdp_splash_logo.h"
+#include "mdss_livedisplay.h"
 
 #include "mdss_livedisplay.h"
 
