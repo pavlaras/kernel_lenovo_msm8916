@@ -59,4 +59,8 @@ obj-$(CONFIG_FIREWIRE_SERIAL)	+= fwserial/
 obj-$(CONFIG_ZCACHE)		+= zcache/
 obj-$(CONFIG_GOLDFISH)		+= goldfish/
 obj-$(CONFIG_USB_DWC2)		+= dwc2/
+<<<<<<< HEAD
+=======
+obj-$(CONFIG_PRIMA_WLAN)	        += prima/
+>>>>>>> Import prima from https://github.com/lenovo-Kraft-T/android_kernel_lenovo_msm8916
 obj-$(CONFIG_PRONTO_WLAN)	+= prima/
