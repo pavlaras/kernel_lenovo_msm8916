@@ -31,7 +31,6 @@ int msm_isp_axi_create_stream(
 			stream_cfg_cmd->stream_src);
 		return -EINVAL;
 	}
-
 	if ((axi_data->stream_handle_cnt << 8) == 0)
 		axi_data->stream_handle_cnt++;
 
