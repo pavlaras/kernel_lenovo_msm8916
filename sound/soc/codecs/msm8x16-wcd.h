@@ -36,6 +36,10 @@
 #define MSM8X16_TOMBAK_LPASS_DIGCODEC_CBCR			0x0181C0B0
 #define MSM8X16_TOMBAK_LPASS_DIGCODEC_AHB_CBCR			0x0181C0B4
 
+#define EXT_SPK_AMP_GPIO	(902+10)
+#define EXT_SPK_AMP_HEADSET_GPIO	(902+11)
+#define HS_US_EU_EN_GPIO    (902+8)
+
 #define MSM8X16_CODEC_NAME "msm8x16_wcd_codec"
 
 #define MSM8X16_WCD_IS_DIGITAL_REG(reg) \
@@ -49,7 +53,7 @@
 #define MCLK_SUS_RSC	2
 #define MCLK_SUS_NO_ACT	3
 
-#define NUM_DECIMATORS	4
+#define NUM_DECIMATORS	2
 #define MSM89XX_VDD_SPKDRV_NAME "cdc-vdd-spkdrv"
 
 #define DEFAULT_MULTIPLIER 800
@@ -310,6 +314,8 @@ extern int msm8x16_wcd_hs_detect(struct snd_soc_codec *codec,
 		    struct wcd_mbhc_config *mbhc_cfg);
 
 extern void msm8x16_wcd_hs_detect_exit(struct snd_soc_codec *codec);
+
+extern int msm8x16_wcd_restart_mbhc(struct snd_soc_codec *codec);
 
 extern void msm8x16_wcd_spk_ext_pa_cb(
 		int (*codec_spk_ext_pa)(struct snd_soc_codec *codec,
