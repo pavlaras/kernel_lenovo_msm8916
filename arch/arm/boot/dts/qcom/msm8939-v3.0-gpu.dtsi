@@ -11,6 +11,7 @@
  */
 
 &soc {
+
 	/* To use BIMC based bus governor */
 	gpubw: qcom,gpubw {
 		label = "gpubw";
@@ -49,7 +50,7 @@
 
 		qcom,chipid = <0x04000500>;
 
-		qcom,initial-pwrlevel = <2>;
+		qcom,initial-pwrlevel = <3>;
 
 		qcom,idle-timeout = <80>; //msec
 		qcom,strtstp-sleepwake;
@@ -61,7 +62,7 @@
 
 		clocks = <&clock_gcc clk_gcc_oxili_gfx3d_clk>,
 		         <&clock_gcc clk_gcc_oxili_ahb_clk>,
-			 <&clock_gcc clk_gcc_oxili_gmem_clk>,
+		         <&clock_gcc clk_gcc_oxili_gmem_clk>,
 		         <&clock_gcc clk_gcc_bimc_gfx_clk>,
 		         <&clock_gcc clk_gcc_bimc_gpu_clk>,
 		         <&clock_gcc clk_gcc_gtcu_ahb_clk>,
