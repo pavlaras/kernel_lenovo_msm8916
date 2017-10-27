@@ -38,6 +38,14 @@
 #define BTSCO_RATE_16KHZ 16000
 #define MAX_SND_CARDS 3
 
+
+#define SAMPLING_RATE_8KHZ      8000
+#define SAMPLING_RATE_16KHZ     16000
+#define SAMPLING_RATE_32KHZ     32000
+#define SAMPLING_RATE_48KHZ     48000
+#define SAMPLING_RATE_96KHZ     96000
+#define SAMPLING_RATE_192KHZ 192000
+
 #define PRI_MI2S_ID	(1 << 0)
 #define SEC_MI2S_ID	(1 << 1)
 #define TER_MI2S_ID	(1 << 2)
@@ -341,62 +349,12 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 					SNDRV_PCM_HW_PARAM_CHANNELS);
 
 	pr_debug("%s()\n", __func__);
-	rate->min = rate->max = mi2s_rx_sample_rate;
+	rate->min = rate->max = 48000;
 	channels->min = channels->max = 2;
 
 	return 0;
 }
 
-static int mi2s_rx_sample_rate_get(struct snd_kcontrol *kcontrol,
-	struct snd_ctl_elem_value *ucontrol)
-{
-	int sample_rate_val = 0;
-
-	switch (mi2s_rx_sample_rate) {
-	case SAMPLING_RATE_192KHZ:
-		sample_rate_val = 2;
-		break;
-
-	case SAMPLING_RATE_96KHZ:
-		sample_rate_val = 1;
-		break;
-
-	case SAMPLING_RATE_48KHZ:
-	default:
-		sample_rate_val = 0;
-		break;
-	}
-
-	ucontrol->value.integer.value[0] = sample_rate_val;
-	pr_debug("%s: mi2s_rx_sample_rate = %d\n", __func__,
-				mi2s_rx_sample_rate);
-
-	return 0;
-}
-
-static int mi2s_rx_sample_rate_put(struct snd_kcontrol *kcontrol,
-	struct snd_ctl_elem_value *ucontrol)
-{
-	pr_debug("%s: ucontrol value = %ld\n", __func__,
-			ucontrol->value.integer.value[0]);
-
-	switch (ucontrol->value.integer.value[0]) {
-	case 2:
-		mi2s_rx_sample_rate = SAMPLING_RATE_192KHZ;
-		break;
-	case 1:
-		mi2s_rx_sample_rate = SAMPLING_RATE_96KHZ;
-		break;
-	case 0:
-	default:
-		mi2s_rx_sample_rate = SAMPLING_RATE_48KHZ;
-	}
-
-	pr_debug("%s: mi2s_rx_sample_rate = %d\n", __func__,
-			mi2s_rx_sample_rate);
-
-	return 0;
-}
 
 static int mi2s_rx_bit_format_get(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
