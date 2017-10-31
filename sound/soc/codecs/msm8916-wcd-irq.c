@@ -440,3 +440,4 @@ int wcd9xxx_spmi_irq_init(void)
 
 MODULE_DESCRIPTION("MSM8x16 SPMI IRQ driver");
 MODULE_LICENSE("GPL v2");
+
