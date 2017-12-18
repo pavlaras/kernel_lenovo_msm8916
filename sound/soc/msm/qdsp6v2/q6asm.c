@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2015, The Linux Foundation. All rights reserved.
  * Author: Brian Swetland <swetland@google.com>
  *
  * This software is licensed under the terms of the GNU General Public
@@ -1199,12 +1199,6 @@ int q6asm_audio_client_buf_alloc_contiguous(unsigned int dir,
 
 	ac->port[dir].buf = buf;
 
-	/* check for integer overflow */
-	if ((bufcnt > 0) && ((INT_MAX / bufcnt) < bufsz)) {
-		pr_err("%s: integer overflow\n", __func__);
-		mutex_unlock(&ac->cmd_lock);
-		goto fail;
-	}
 	bytes_to_alloc = bufsz * bufcnt;
 
 	/* The size to allocate should be multiple of 4K bytes */
@@ -2237,7 +2231,12 @@ static int __q6asm_open_write(struct audio_client *ac, uint32_t format,
 	if (open.postprocopo_id == ASM_STREAM_POSTPROC_TOPO_ID_DTS_HPX)
 		open.bits_per_sample = 24;
 
-	ac->topology = open.postprocopo_id;
+	/*
+	 * For Gapless playback it will use the same session for next stream,
+	 * So use the same topology
+	 */
+	if(!ac->topology)
+		ac->topology = open.postprocopo_id;
 	switch (format) {
 	case FORMAT_LINEAR_PCM:
 		open.dec_fmt_id = ASM_MEDIA_FMT_MULTI_CHANNEL_PCM_V2;
@@ -4229,19 +4228,20 @@ fail_cmd:
 	return rc;
 }
 
-int q6asm_dts_eagle_set(struct audio_client *ac, int param_id, int size,
+int q6asm_dts_eagle_set(struct audio_client *ac, int param_id, uint32_t size,
 			void *data)
 {
-	int sz = sizeof(struct asm_dts_eagle_param) + size, rc = 0;
+	int rc = 0;
+	uint32_t sz = sizeof(struct asm_dts_eagle_param) + size;
 	struct asm_dts_eagle_param *ad = kzalloc(sz, GFP_KERNEL);
 	if (!ad) {
-		pr_err("DTS_EAGLE_ASM - %s: error allocating mem of size %i\n",
+		pr_err("DTS_EAGLE_ASM - %s: error allocating mem of size %u\n",
 			__func__, sz);
 		return -ENOMEM;
 	}
 
-	if (!ac || ac->apr == NULL || size <= 0 || !data) {
-		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %i or pointer %p.\n",
+	if (!ac || ac->apr == NULL || (size == 0) || !data) {
+		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %u or pointer %p.\n",
 			__func__, size, data);
 		return -EINVAL;
 	}
@@ -4284,21 +4284,22 @@ fail_cmd:
 	return rc;
 }
 
-int q6asm_dts_eagle_get(struct audio_client *ac, int param_id, int size,
+int q6asm_dts_eagle_get(struct audio_client *ac, int param_id, uint32_t size,
 			void *data)
 {
 	struct asm_dts_eagle_param_get *ad;
-	int rc = 0, sz;
+	int rc = 0;
+	uint32_t sz;
 
-	if (!ac || ac->apr == NULL || size <= 0 || !data) {
-		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %i or pointer %p.\n",
+	if (!ac || ac->apr == NULL || (size == 0) || !data) {
+		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %u or pointer %p.\n",
 			__func__, size, data);
 		return -EINVAL;
 	}
 	sz = sizeof(struct asm_dts_eagle_param_get) + CMD_GET_HDR_SZ + size;
 	ad = kzalloc(sz, GFP_KERNEL);
 	if (!ad) {
-		pr_err("DTS_EAGLE_ASM - %s: error allocating memory of size %i\n",
+		pr_err("DTS_EAGLE_ASM - %s: error allocating memory of size %u\n",
 			__func__, sz);
 		return -ENOMEM;
 	}
@@ -4316,7 +4317,7 @@ int q6asm_dts_eagle_get(struct audio_client *ac, int param_id, int size,
 	generic_get_data = kzalloc(size + sizeof(struct generic_get_data_),
 				   GFP_KERNEL);
 	if (!generic_get_data) {
-		pr_err("DTS_EAGLE_ASM - %s: error allocating mem of size %i\n",
+		pr_err("DTS_EAGLE_ASM - %s: error allocating mem of size %u\n",
 			__func__, size);
 		rc = -ENOMEM;
 		goto fail_cmd;

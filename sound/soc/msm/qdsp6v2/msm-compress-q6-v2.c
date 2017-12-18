@@ -1692,6 +1692,7 @@ static int msm_compr_pointer(struct snd_compr_stream *cstream,
 	uint64_t timestamp = 0;
 	int rc = 0, first_buffer;
 	unsigned long flags;
+	uint32_t gapless_transition;
 
 	pr_debug("%s\n", __func__);
 	memset(&tstamp, 0x0, sizeof(struct snd_compr_tstamp));
@@ -1710,13 +1711,18 @@ static int msm_compr_pointer(struct snd_compr_stream *cstream,
 		return -ENETRESET;
 	}
 
+	gapless_transition = prtd->gapless_state.gapless_transition;
 	spin_unlock_irqrestore(&prtd->lock, flags);
 
 	/*
 	 Query timestamp from DSP if some data is with it.
 	 This prevents timeouts.
 	*/
-	if (!first_buffer) {
+	if (!first_buffer || gapless_transition) {
+		if (gapless_transition)
+			pr_debug("%s session time in gapless transition",
+				 __func__);
+
 		rc = q6asm_get_session_time(prtd->audio_client, &timestamp);
 		if (rc < 0) {
 			pr_err("%s: Get Session Time return value =%lld\n",
@@ -1877,7 +1883,8 @@ static int msm_compr_get_codec_caps(struct snd_compr_stream *cstream,
 	case SND_AUDIOCODEC_MP3:
 		codec->num_descriptors = 2;
 		codec->descriptor[0].max_ch = 2;
-		codec->descriptor[0].sample_rates = SNDRV_PCM_RATE_8000_48000;
+		codec->descriptor[0].sample_rates[0] = SNDRV_PCM_RATE_8000_48000;
+		codec->descriptor[0].num_sample_rates = 1;
 		codec->descriptor[0].bit_rate[0] = 320; /* 320kbps */
 		codec->descriptor[0].bit_rate[1] = 128;
 		codec->descriptor[0].num_bitrates = 2;
@@ -1888,7 +1895,8 @@ static int msm_compr_get_codec_caps(struct snd_compr_stream *cstream,
 	case SND_AUDIOCODEC_AAC:
 		codec->num_descriptors = 2;
 		codec->descriptor[1].max_ch = 2;
-		codec->descriptor[1].sample_rates = SNDRV_PCM_RATE_8000_48000;
+		codec->descriptor[1].sample_rates[0] = SNDRV_PCM_RATE_8000_48000;
+		codec->descriptor[1].num_sample_rates = 1;
 		codec->descriptor[1].bit_rate[0] = 320; /* 320kbps */
 		codec->descriptor[1].bit_rate[1] = 128;
 		codec->descriptor[1].num_bitrates = 2;
@@ -2307,7 +2315,7 @@ static int msm_compr_audio_effects_config_info(struct snd_kcontrol *kcontrol,
 					       struct snd_ctl_elem_info *uinfo)
 {
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
-	uinfo->count = MAX_PP_PARAMS_SZ;
+	uinfo->count = 128;
 	uinfo->value.integer.min = 0;
 	uinfo->value.integer.max = 0xFFFFFFFF;
 	return 0;

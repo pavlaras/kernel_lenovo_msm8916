@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -428,6 +428,36 @@ int afe_q6_interface_prepare(void)
 	}
 	return ret;
 }
+
+#ifdef CONFIG_ARCH_MSM8916
+int msm8x16_quat_mi2s_clocks(bool enable)
+{
+	union afe_port_config port_config;
+	u16 port_id = AFE_PORT_ID_QUATERNARY_MI2S_RX;
+	int rc = 0;
+
+	if(enable) {
+		port_config.i2s.channel_mode = AFE_PORT_I2S_SD0;
+		port_config.i2s.mono_stereo = MSM_AFE_CH_STEREO;
+		port_config.i2s.bit_width = 16;
+		port_config.i2s.i2s_cfg_minor_version = AFE_API_VERSION_I2S_CONFIG;
+		port_config.i2s.sample_rate = 48000;
+		port_config.i2s.ws_src = 1;
+		rc = afe_port_start(port_id, &port_config, 48000);
+		if (IS_ERR_VALUE(rc)) {
+			pr_err("fail to open AFE port\n");
+			return -EINVAL;
+		}
+	} else {
+		rc = afe_close(port_id);
+		if (IS_ERR_VALUE(rc)) {
+			pr_err("fail to close AFE port\n");
+			return -EINVAL;
+		}
+	}
+	return rc;
+}
+#endif
 
 /*
  * afe_apr_send_pkt : returns 0 on success, negative otherwise.
@@ -3426,6 +3456,7 @@ int afe_validate_port(u16 port_id)
 	case SLIMBUS_6_TX:
 	case AFE_PORT_ID_PRIMARY_MI2S_RX:
 	case AFE_PORT_ID_PRIMARY_MI2S_TX:
+	case AFE_PORT_ID_SECONDARY_MI2S_RX:
 	case AFE_PORT_ID_QUATERNARY_MI2S_RX:
 	case AFE_PORT_ID_QUATERNARY_MI2S_TX:
 	case AFE_PORT_ID_TERTIARY_MI2S_TX:
@@ -4287,6 +4318,7 @@ static int afe_map_cal_data(int32_t cal_type,
 			__func__,
 			&cal_block->cal_data.paddr,
 			cal_block->map_data.map_size);
+		goto done;
 	}
 	cal_block->map_data.q6map_handle = atomic_read(&this_afe.
 		mem_map_cal_handles[cal_index]);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -33,6 +33,11 @@
 #define MSM8X16_TOMBAK_LPASS_DIGCODEC_D				0x0181C0AC
 #define MSM8X16_TOMBAK_LPASS_DIGCODEC_CBCR			0x0181C0B0
 #define MSM8X16_TOMBAK_LPASS_DIGCODEC_AHB_CBCR			0x0181C0B4
+
+#define EXT_SPK_AMP_GPIO    (902+10)
+#define EXT_SPK_AMP_GPIO_1    (902+11)
+#define EXT_SPK_AMP_HEADSET_GPIO    (902+52)
+#define HS_US_EU_EN_GPIO    (902+8)
 
 #define MSM8X16_CODEC_NAME "msm8x16_wcd_codec"
 
@@ -160,8 +165,11 @@ struct msm8916_asoc_mach_data {
 	int codec_type;
 	int ext_pa;
 	int us_euro_gpio;
+	int spk_ext_pa_gpio;
 	int mclk_freq;
 	int lb_mode;
+	u8 micbias1_cap_mode;
+	u8 micbias2_cap_mode;
 	atomic_t mclk_rsc_ref;
 	atomic_t mclk_enabled;
 	struct mutex cdc_mclk_mutex;
@@ -169,6 +177,7 @@ struct msm8916_asoc_mach_data {
 	struct afe_digital_clk_cfg digital_cdc_clk;
 	void __iomem *vaddr_gpio_mux_spkr_ctl;
 	void __iomem *vaddr_gpio_mux_mic_ctl;
+	void __iomem *vaddr_gpio_mux_pcm_ctl;
 };
 
 struct msm8x16_wcd_pdata {
@@ -237,7 +246,7 @@ struct msm8x16_wcd_priv {
 	struct fw_info *fw_data;
 	struct blocking_notifier_head notifier;
 	unsigned long status_mask;
-
+	int (*codec_spk_ext_pa_cb)(struct snd_soc_codec *codec, int enable);
 };
 
 extern int msm8x16_wcd_mclk_enable(struct snd_soc_codec *codec, int mclk_enable,
@@ -254,5 +263,8 @@ extern int msm8x16_register_notifier(struct snd_soc_codec *codec,
 extern int msm8x16_unregister_notifier(struct snd_soc_codec *codec,
 				     struct notifier_block *nblock);
 
+extern void msm8x16_wcd_spk_ext_pa_cb(
+		int (*codec_spk_ext_pa)(struct snd_soc_codec *codec,
+		int enable), struct snd_soc_codec *codec);
 #endif
 
